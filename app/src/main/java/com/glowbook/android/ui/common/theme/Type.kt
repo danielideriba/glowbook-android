@@ -1,4 +1,4 @@
-package com.glowbook.android.ui.theme
+package com.glowbook.android.ui.common.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
