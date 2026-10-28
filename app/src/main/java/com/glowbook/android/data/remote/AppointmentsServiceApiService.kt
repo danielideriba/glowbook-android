@@ -5,7 +5,7 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface AppointmentsServiceApiService {
-    @GET("rest/v1/agendamento_servicos")
+    @GET("agendamento_servicos")
     suspend fun appointmentsServices(
         @Query("select") select: String =
             "agendamento_id,preco,servicos(nome,icone,duracao_minutos)",

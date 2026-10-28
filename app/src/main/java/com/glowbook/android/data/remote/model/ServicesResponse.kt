@@ -1,15 +1,13 @@
 package com.glowbook.android.data.remote.model
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import com.google.gson.annotations.SerializedName
 
-@Serializable
 data class ServicesResponse(
     val id: Long,
     val nome: String,
-    @SerialName("categoria_id") val categoriaId: Long,
+    @SerializedName("categoria_id") val categoriaId: Long,
     val preco: Double? = null,
-    @SerialName("duracao_minutos") val duracaoMinutos: Int? = null,
+    @SerializedName("duracao_minutos") val duracaoMinutos: Int? = null,
     val ativo: Boolean = true,
     val icone: String? = null
 )

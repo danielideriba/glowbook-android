@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,8 +25,8 @@ import androidx.compose.ui.unit.sp
 import com.glowbook.android.ui.common.theme.GlowHeaderStart
 import com.glowbook.android.ui.common.theme.GlowRose
 import com.glowbook.android.ui.common.theme.GlowRoseDark
-import com.glowbook.android.ui.features.home.model.HomeSampleData
 import com.glowbook.android.ui.features.home.model.NextAppointmentUi
+import com.glowbook.android.R
 
 @Composable
 fun NextAppointmentCard(
@@ -57,7 +58,7 @@ fun NextAppointmentCard(
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "PRÓXIMO AGENDAMENTO",
+                text = stringResource(R.string.next_appointment_card_header_text),
                 fontSize = 10.sp,
                 color = Color.White.copy(alpha = 0.65f)
             )
@@ -75,7 +76,7 @@ fun NextAppointmentCard(
         }
 
         Text(
-            text = "Ver",
+            text = stringResource(R.string.next_appointment_card_see_button),
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
                 .background(Color.White)
@@ -91,6 +92,6 @@ fun NextAppointmentCard(
 @Composable
 private fun NextAppointmentCardPreview() {
     Box(modifier = Modifier.background(GlowHeaderStart).padding(16.dp)) {
-        NextAppointmentCard(appointment = HomeSampleData.nextAppointment, onClick = {})
+        NextAppointmentCard(appointment = NextAppointmentUi(icon = "✂️", title = "Corte + Escova", subtitle = "Sexta, 27 Jun • 14:00 • Camila"), onClick = {})
     }
 }

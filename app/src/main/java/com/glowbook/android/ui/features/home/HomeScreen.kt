@@ -22,12 +22,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.glowbook.android.domain.entity.ProfessionalEntity
+import com.glowbook.android.R
 import com.glowbook.android.ui.common.theme.GlowBackground
 import com.glowbook.android.ui.common.theme.GlowMuted
 import com.glowbook.android.ui.common.theme.GlowRose
@@ -38,10 +40,10 @@ import com.glowbook.android.ui.features.home.components.CategoriesRow
 import com.glowbook.android.ui.features.home.components.HomeHeader
 import com.glowbook.android.ui.features.home.components.ProfessionalCard
 import com.glowbook.android.ui.features.home.model.CategoryUi
-import com.glowbook.android.ui.features.home.model.HomeSampleData
 import com.glowbook.android.ui.features.home.model.NextAppointmentUi
 import com.glowbook.android.ui.features.home.model.ProfessionalUi
 import com.glowbook.android.ui.features.home.model.toUi
+import com.glowbook.android.ui.nav.AppScreen
 import com.glowbook.android.ui.viewmodel.HomeScreenViewModel
 import com.glowbook.android.utils.UiState
 
@@ -51,29 +53,37 @@ fun HomeScreen(
     viewModel: HomeScreenViewModel = hiltViewModel()
 ) {
     val professionalsState by viewModel.professionalsState.collectAsState()
+    val categoriesState by viewModel.categoriesState.collectAsState()
+    val nextAppointmentState by viewModel.nextAppointmentState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.fetchProfessionalAvailable()
+        viewModel.fetchHomeData()
     }
 
     HomeContent(
-        userName = "Ana",
-        nextAppointment = HomeSampleData.nextAppointment,
-        categories = HomeSampleData.categories,
-        professionalsState = professionalsState.toProfessionalsUi(),
-        onNextAppointmentClick = {},
-        onProfessionalClick = {},
-        onBottomNavClick = {}
+        userName = stringResource(R.string.home_default_username),
+        nextAppointments = (nextAppointmentState as? UiState.Success)?.data?.map { it.toUi() }.orEmpty(),
+        categoriesState = categoriesState.mapSuccess { categories -> categories.map { it.toUi() } },
+        professionalsState = professionalsState.mapSuccess { professionals -> professionals.map { it.toUi() } },
+        onNextAppointmentClick = { navController.navigate(AppScreen.Appointments.route) },
+        onProfessionalClick = { professional ->
+            navController.navigate(AppScreen.ProfessionalServices.createRoute(professional.id))
+        },
+        onBottomNavClick = { item ->
+            if (item == BottomNavItem.Schedule) {
+                navController.navigate(AppScreen.Appointments.route)
+            }
+        }
     )
 }
 
 @Composable
 fun HomeContent(
     userName: String,
-    nextAppointment: NextAppointmentUi?,
-    categories: List<CategoryUi>,
+    nextAppointments: List<NextAppointmentUi>,
+    categoriesState: UiState<List<CategoryUi>>,
     professionalsState: UiState<List<ProfessionalUi>>,
-    onNextAppointmentClick: () -> Unit,
+    onNextAppointmentClick: (NextAppointmentUi) -> Unit,
     onProfessionalClick: (ProfessionalUi) -> Unit,
     onBottomNavClick: (BottomNavItem) -> Unit,
     modifier: Modifier = Modifier
@@ -92,21 +102,27 @@ fun HomeContent(
             item {
                 HomeHeader(
                     userName = userName,
-                    nextAppointment = nextAppointment,
+                    nextAppointments = nextAppointments,
                     onNextAppointmentClick = onNextAppointmentClick
                 )
             }
 
             item {
                 Column(modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp)) {
-                    SectionLabel(text = "Serviços")
-                    CategoriesRow(
-                        categories = categories,
-                        selectedIndex = selectedCategory,
-                        onCategoryClick = { selectedCategory = it }
-                    )
+                    SectionLabel(text = stringResource(R.string.home_section_services))
+                    when (categoriesState) {
+                        is UiState.Success -> CategoriesRow(
+                            categories = categoriesState.data,
+                            selectedIndex = selectedCategory,
+                            onCategoryClick = { selectedCategory = it }
+                        )
+
+                        is UiState.Error -> HomeMessage(text = categoriesState.message)
+
+                        UiState.Loading, UiState.Ready -> HomeLoading()
+                    }
                     Spacer(modifier = Modifier.height(24.dp))
-                    SectionLabel(text = "Profissionais disponíveis")
+                    SectionLabel(text = stringResource(R.string.home_section_available_professionals))
                 }
             }
 
@@ -124,14 +140,7 @@ fun HomeContent(
                 }
 
                 UiState.Loading, UiState.Ready -> item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color = GlowRose)
-                    }
+                    HomeLoading()
                 }
             }
         }
@@ -155,9 +164,21 @@ private fun HomeMessage(text: String) {
     )
 }
 
-private fun UiState<List<ProfessionalEntity>>.toProfessionalsUi(): UiState<List<ProfessionalUi>> =
+@Composable
+private fun HomeLoading() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(color = GlowRose)
+    }
+}
+
+private fun <T, R> UiState<T>.mapSuccess(transform: (T) -> R): UiState<R> =
     when (this) {
-        is UiState.Success -> UiState.Success(data.map { it.toUi() })
+        is UiState.Success -> UiState.Success(transform(data))
         is UiState.Error -> this
         UiState.Loading -> UiState.Loading
         UiState.Ready -> UiState.Ready
@@ -168,9 +189,12 @@ private fun UiState<List<ProfessionalEntity>>.toProfessionalsUi(): UiState<List<
 private fun HomeContentPreview() {
     HomeContent(
         userName = "Ana",
-        nextAppointment = HomeSampleData.nextAppointment,
-        categories = HomeSampleData.categories,
-        professionalsState = UiState.Success(HomeSampleData.professionals),
+        nextAppointments = listOf(
+            NextAppointmentUi(icon = "✂️", title = "Corte + Escova", subtitle = "Sexta, 27 Jun • 14:00 • Camila"),
+            NextAppointmentUi(icon = "💅", title = "Nail Art completo", subtitle = "Sábado, 28 Jun • 10:00 • Beatriz")
+        ),
+        categoriesState = UiState.Success(listOf(CategoryUi("✂️", "Cabelo"), CategoryUi("💅", "Unhas"), CategoryUi("✨", "Estética"), CategoryUi("🧖", "Spa"))),
+        professionalsState = UiState.Success(listOf(ProfessionalUi(1, "👩", Color(0xFFFDEBD0), "Camila Rocha", "Cabelo • Coloração", 4.9, R.string.professional_available_today))),
         onNextAppointmentClick = {},
         onProfessionalClick = {},
         onBottomNavClick = {}

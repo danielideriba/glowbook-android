@@ -17,17 +17,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.glowbook.android.R
 import com.glowbook.android.ui.common.theme.GlowAvailableBg
 import com.glowbook.android.ui.common.theme.GlowAvailableText
 import com.glowbook.android.ui.common.theme.GlowBorder
 import com.glowbook.android.ui.common.theme.GlowGold
 import com.glowbook.android.ui.common.theme.GlowMuted
 import com.glowbook.android.ui.common.theme.GlowText
-import com.glowbook.android.ui.features.home.model.HomeSampleData
 import com.glowbook.android.ui.features.home.model.ProfessionalUi
 import java.util.Locale
 
@@ -80,7 +81,7 @@ fun ProfessionalCard(
         }
 
         Text(
-            text = professional.availability,
+            text = stringResource(professional.availability),
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
                 .background(GlowAvailableBg)
@@ -93,7 +94,6 @@ fun ProfessionalCard(
 }
 
 private fun starsFor(rating: Double): String {
-    // 4.9 → ★★★★★, 4.7 → ★★★★☆ (same as the mockup)
     val filled = (1..5).count { rating >= it - 0.15 }
     return "★".repeat(filled) + "☆".repeat(5 - filled)
 }
@@ -102,7 +102,7 @@ private fun starsFor(rating: Double): String {
 @Composable
 private fun ProfessionalCardPreview() {
     ProfessionalCard(
-        professional = HomeSampleData.professionals.first(),
+        professional = ProfessionalUi(1, "👩", Color(0xFFFDEBD0), "Camila Rocha", "Cabelo • Coloração", 4.9, R.string.professional_available_today),
         onClick = {},
         modifier = Modifier.padding(16.dp)
     )

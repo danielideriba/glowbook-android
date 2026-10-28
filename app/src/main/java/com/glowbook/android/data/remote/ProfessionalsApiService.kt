@@ -6,10 +6,17 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface ProfessionalsApiService {
-    @GET("rest/v1/profissionais")
+    @GET("profissionais")
     suspend fun profissionais(
         @Query("select") select: String = "*",
         @Query("disponivel") disponivel: String = "eq.true",
-        @Query("order") order: String = "id.asc"
+        @Query("order") order: String = "id.asc",
+        @Query("limit") limit: Int
+    ): Response<List<ProfessionalsResponse>>
+
+    @GET("profissionais")
+    suspend fun profissionalById(
+        @Query("select") select: String = "*",
+        @Query("id") id: String
     ): Response<List<ProfessionalsResponse>>
 }
