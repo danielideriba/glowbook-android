@@ -76,6 +76,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         "**/*Test*.*", "android/**/*.*",
         "**/*_MembersInjector*.*", "**/*Hilt*.*", "**/*_Factory*.*",
         "**/*_ComponentTreeDeps*.*", "**/*GeneratedInjector*.*",
+        "**/*\$DefaultImpls*.*",
         "**/*ComposableSingletons*.*", "**/*Activity*.*",
         "**/*Screen*.*", "**/*NavHost*.*", "**/*ViewModel*.*",
         "**/*Application*.*", "**/*Module*.*", "**/*Component*.*",
